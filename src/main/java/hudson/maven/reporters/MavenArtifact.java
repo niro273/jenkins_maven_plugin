@@ -24,11 +24,13 @@
 package hudson.maven.reporters;
 
 import com.google.common.collect.Maps;
+
 import hudson.Util;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenBuildProxy;
 import hudson.model.Api;
 import hudson.model.BuildListener;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,11 +39,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
+
 import jenkins.model.StandardArtifactManager;
 import jenkins.util.VirtualFile;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -146,7 +152,14 @@ public final class MavenArtifact implements Serializable {
             return null; // perhaps build failed and didn't leave an artifact
         if(!file.isFile())
             return null; // file doesn't exist or artifact points to a directory
-        return new MavenArtifact(a);
+        //carbon-feature is a native packaging type of wso2
+        //if the packaging is .carbon-feature --> set .zip
+        if(a.getType().equalsIgnoreCase("carbon-feature")){
+        	return new MavenArtifact(a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), "zip", a.getFile().getName(), Util.getDigestOf(a.getFile()));
+        }else{
+        	return new MavenArtifact(a);
+        }
+
     }
 
     public boolean isPOM() {
